@@ -8,7 +8,7 @@ export interface AmountOutResult {
 }
 
 export declare class SimulationClient {
-  constructor(tychoUrl: string, apiKey?: string, tvlThreshold?: number);
+  constructor(tychoUrl: string, apiKey?: string | null, tvlThreshold?: number | null);
   getSpotPrice(token0Address: string, token1Address: string): Promise<number>;
   getAmountOut(tokenInAddress: string, tokenOutAddress: string, amountsIn: number[]): Promise<AmountOutResult[]>;
 }

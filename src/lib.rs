@@ -51,16 +51,16 @@ pub struct SimulationClient {
 #[napi]
 impl SimulationClient {
     #[napi(constructor)]
-    pub fn new(tycho_url: String, api_key: String, tvl_threshold: f64) -> Result<Self> {
+    pub fn new(tycho_url: String, api_key: Option<String>, tvl_threshold: Option<f64>) -> Result<Self> {
         let runtime = tokio::runtime::Runtime::new()
             .map_err(|e| Error::from_reason(format!("Failed to create runtime: {}", e)))?;
         runtime.block_on(async {
             log("Initializing SimulationClient...");
             
-            let tvl_filter = ComponentFilter::with_tvl_range(tvl_threshold, tvl_threshold);
-            log(&format!("Using TVL threshold: {}", tvl_threshold));
+            let tvl_filter = ComponentFilter::with_tvl_range(tvl_threshold.unwrap_or(1000.0), tvl_threshold.unwrap_or(1000.0));
+            log(&format!("Using TVL threshold: {}", tvl_threshold.unwrap_or(1000.0)));
             
-            let all_tokens = load_all_tokens(&tycho_url, false, Some(&api_key)).await;
+            let all_tokens = load_all_tokens(&tycho_url, false, api_key.as_ref().map(|s| s.as_str())).await;
             log(&format!("Loaded {} tokens", all_tokens.len()));
 
             let protocol_stream = ProtocolStreamBuilder::new(&tycho_url, Chain::Ethereum)
@@ -72,7 +72,7 @@ impl SimulationClient {
                     tvl_filter.clone(),
                     Some(balancer_pool_filter),
                 )
-                .auth_key(Some(api_key))
+                .auth_key(api_key)
                 .set_tokens(all_tokens.clone())
                 .await
                 .build()

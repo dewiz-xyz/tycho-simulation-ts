@@ -9,7 +9,7 @@ export interface AmountOutResult {
   gasUsed: Array<number>
 }
 export declare class SimulationClient {
-  constructor(tychoUrl: string, apiKey: string, tvlThreshold: number)
+  constructor(tychoUrl: string, apiKey?: string | undefined | null, tvlThreshold?: number | undefined | null)
   getSpotPrice(token0Address: string, token1Address: string): number
   getAmountOut(tokenInAddress: string, tokenOutAddress: string, amountsIn: Array<number>): Array<AmountOutResult>
 }
