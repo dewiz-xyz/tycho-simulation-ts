@@ -5,26 +5,53 @@
     "node": ">=16.0.0"
   },
   "description": "TypeScript bindings for Tycho simulation",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "napi": {
     "name": "tycho-simulation-ts",
     "triples": {
       "defaults": true,
       "additional": [
         "aarch64-apple-darwin",
-        "x86_64-apple-darwin"
+        "x86_64-apple-darwin",
+        "x86_64-unknown-linux-gnu",
+        "aarch64-unknown-linux-gnu"
       ]
+    }
+  },
+  "binary": {
+    "napi": {
+      "name": "tycho-simulation-ts",
+      "package": "tycho-simulation-ts",
+      "triples": {
+        "defaults": true,
+        "additional": [
+          "aarch64-apple-darwin",
+          "x86_64-apple-darwin",
+          "x86_64-unknown-linux-gnu",
+          "aarch64-unknown-linux-gnu"
+        ]
+      }
     }
   },
   "files": [
     "dist",
+    "dist/cjs",
     "index.node",
     "src",
     "binding.gyp",
     "README.md",
     "LICENSE",
     "tsconfig.json",
+    "tsconfig.cjs.json",
     "build.rs",
     "Cargo.toml",
     "Cargo.lock"
@@ -34,13 +61,13 @@
     "build:rust": "napi build --platform --release",
     "build:debug": "napi build --platform",
     "clean": "rm -rf target index.node dist 2>/dev/null || true",
-    "prepublishOnly": "npm run build && napi prepublish -t npm",
+    "prepublishOnly": "npm run build",
     "prepare": "npm run build",
-    "prepack": "npm run build",
+    "prepack": "npm run build && napi prepublish -t npm",
     "test": "jest",
     "universal": "napi universal",
     "version": "napi version",
-    "build:ts": "tsc",
+    "build:ts": "tsc && tsc -p tsconfig.cjs.json",
     "build": "npm run build:rust && npm run build:ts",
     "test:amount": "npm run build && ts-node examples/amount_out_test.ts"
   },
