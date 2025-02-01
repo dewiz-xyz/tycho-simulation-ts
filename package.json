@@ -31,7 +31,7 @@
   ],
   "scripts": {
     "artifacts": "napi artifacts",
-    "build": "napi build --platform --release",
+    "build:rust": "napi build --platform --release",
     "build:debug": "napi build --platform",
     "clean": "rm -rf target index.node dist 2>/dev/null || true",
     "prepublishOnly": "npm run build:all && napi prepublish -t npm",
@@ -41,7 +41,7 @@
     "universal": "napi universal",
     "version": "napi version",
     "build:ts": "tsc",
-    "build:all": "npm run build && npm run build:ts",
+    "build": "npm run build:rust && npm run build:ts",
     "test:amount": "npm run build && ts-node examples/amount_out_test.ts"
   },
   "repository": {
