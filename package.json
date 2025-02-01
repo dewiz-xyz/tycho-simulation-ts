@@ -36,7 +36,7 @@
     "clean": "rm -rf target index.node dist 2>/dev/null || true",
     "prepublishOnly": "npm run build:all && napi prepublish -t npm",
     "prepare": "npm run build:all",
-    "install": "npm run build:all",
+    "prepack": "npm run build:all",
     "test": "jest",
     "universal": "napi universal",
     "version": "napi version",
