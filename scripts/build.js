@@ -170,9 +170,9 @@ function build() {
     }
 
     // Only build TypeScript during development, not during installation
-    if (!isPostInstall) {
-        buildTypeScript();
-    }
+    // if (!isPostInstall) {
+    //     buildTypeScript();
+    // }
 
     console.log('Build completed successfully');
 }
