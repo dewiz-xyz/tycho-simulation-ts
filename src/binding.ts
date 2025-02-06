@@ -1,5 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+import { createRequire } from 'module';
 
 export interface AmountOutResult {
   pool: string;
@@ -16,9 +19,11 @@ export declare class SimulationClient {
 let nativeBinding: { SimulationClient: typeof SimulationClient } | undefined;
 
 try {
-  const path = require('path');
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+  const require = createRequire(import.meta.url);
   // Try to load the native module from the root directory
-  const modulePath = path.resolve(__dirname, '..', 'index.node');
+  const modulePath = resolve(__dirname, '..', 'index.node');
   nativeBinding = require(modulePath);
 } catch (e) {
   throw new Error(`Failed to load native binding: ${e}`);
