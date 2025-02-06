@@ -16,7 +16,7 @@ package-lock.json
 .vscode/
 *.swp
 *.swo
-
+*.node
 # Logs
 *.log
 tycho_node.log
