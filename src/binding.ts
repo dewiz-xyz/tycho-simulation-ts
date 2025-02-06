@@ -3,43 +3,29 @@
 
 export interface AmountOutResult {
   pool: string;
-  amountsOut: number[];
-  gasUsed: number[];
+  amountsOut: bigint[];
+  gasUsed: bigint[];
 }
 
 export declare class SimulationClient {
   constructor(tychoUrl: string, apiKey?: string, tvlThreshold?: number);
   getSpotPrice(token0Address: string, token1Address: string): Promise<number>;
-  getAmountOut(tokenInAddress: string, tokenOutAddress: string, amountsIn: number[]): Promise<AmountOutResult[]>;
+  getAmountOut(tokenInAddress: string, tokenOutAddress: string, amountsIn: bigint[]): Promise<AmountOutResult[]>;
 }
 
 let nativeBinding: { SimulationClient: typeof SimulationClient } | undefined;
 
 try {
-  // Try to load the native module from various possible locations
-  const possiblePaths = [
-    // When imported from dist/
-    '../../index.node',
-    // When imported from examples/
-    '../index.node',
-    // When imported from root
-    './index.node'
-  ];
-
-  for (const path of possiblePaths) {
-    try {
-      nativeBinding = require(path);
-      break;
-    } catch (e) {
-      // Continue trying other paths
-    }
-  }
-
-  if (!nativeBinding) {
-    throw new Error('Could not find native module in any expected location');
-  }
+  const path = require('path');
+  // Try to load the native module from the root directory
+  const modulePath = path.resolve(__dirname, '..', 'index.node');
+  nativeBinding = require(modulePath);
 } catch (e) {
   throw new Error(`Failed to load native binding: ${e}`);
+}
+
+if (!nativeBinding) {
+  throw new Error('Native binding is undefined after loading');
 }
 
 export const { SimulationClient: NativeSimulationClient } = nativeBinding;

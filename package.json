@@ -13,7 +13,10 @@
       "defaults": true,
       "additional": [
         "aarch64-apple-darwin",
-        "x86_64-apple-darwin"
+        "x86_64-apple-darwin",
+        "x86_64-pc-windows-msvc",
+        "aarch64-unknown-linux-gnu",
+        "x86_64-unknown-linux-gnu"
       ]
     }
   },
@@ -21,11 +24,12 @@
     "dist",
     "index.node",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "scripts"
   ],
   "scripts": {
     "artifacts": "napi artifacts",
-    "build": "napi build --platform --release",
+    "build:native": "napi build --platform --release",
     "build:debug": "napi build --platform",
     "clean": "rm -rf target index.node dist 2>/dev/null || true",
     "prepublishOnly": "napi prepublish -t npm",
@@ -33,8 +37,8 @@
     "universal": "napi universal",
     "version": "napi version",
     "build:ts": "tsc",
-    "build:all": "npm run build && npm run build:ts",
-    "test:amount": "npm run build && ts-node examples/amount_out_test.ts"
+    "build": "node scripts/build.js",
+    "test:amount": "ts-node examples/amount_out_test.ts"
   },
   "repository": {
     "type": "git",

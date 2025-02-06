@@ -35,13 +35,13 @@ async function runTest(): Promise<void> {
         // Generate 10000 amounts between 0.1 and 10 ETH (in wei)
         const amountsInWei = Array.from({ length: 10000 }, () => {
             const ethAmount = 0.1 + Math.random() * 9.9; // Random ETH amount between 0.1 and 10
-            return Math.floor(ethAmount * 1e18); // Convert to wei and ensure it's an integer
+            return BigInt(Math.floor(ethAmount * 1e18)); // Convert to wei and ensure it's an integer
         });
         
         console.log(`Generated ${amountsInWei.length} test amounts`);
         console.log("Sample amounts (first 5):");
         amountsInWei.slice(0, 5).forEach(amount => {
-            console.log(`${amount} wei (${amount / 1e18} ETH)`);
+            console.log(`${amount} wei (${Number(amount) / 1e18} ETH)`);
         });
 
         console.log("\nQuerying amounts out...");
@@ -62,12 +62,12 @@ async function runTest(): Promise<void> {
             console.log(`\nPool ${index + 1} (${result.pool}):`);
             console.log("Sample amounts out (first 5):");
             for (let i = 0; i < 5; i++) {
-                const ethAmount = amountsInWei[i] / 1e18; // Convert wei to ETH for display
-                const usdcAmount = result.amountsOut[i] / 1e6; // Convert USDC smallest unit to USDC for display
+                const ethAmount = Number(amountsInWei[i]) / 1e18; // Convert wei to ETH for display
+                const usdcAmount = Number(result.amountsOut[i]) / 1e6; // Convert USDC smallest unit to USDC for display
                 console.log(`${ethAmount} ETH (${amountsInWei[i]} wei) -> ${usdcAmount} USDC (${result.amountsOut[i]} units) (Gas: ${result.gasUsed[i]})`);
             }
             // Add summary statistics
-            const avgGas = result.gasUsed.reduce((a, b) => a + b, 0) / result.gasUsed.length;
+            const avgGas = Number(result.gasUsed.reduce((a, b) => a + b, BigInt(0))) / result.gasUsed.length;
             console.log(`Average gas used: ${avgGas.toFixed(2)}`);
         });
 

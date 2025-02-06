@@ -3,7 +3,7 @@
 use futures::{Stream, StreamExt};
 use napi_derive::napi;
 use napi::{bindgen_prelude::*, Result};
-use num_bigint::BigUint;
+use num_bigint::{BigUint, Sign};
 use num_traits::cast::ToPrimitive;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -37,8 +37,8 @@ type StreamType = Box<dyn Stream<Item = BlockUpdate> + Send + Unpin>;
 #[napi(object)]
 pub struct AmountOutResult {
     pub pool: String,
-    pub amountsOut: Vec<f64>,
-    pub gasUsed: Vec<f64>,
+    pub amountsOut: Vec<BigInt>,
+    pub gasUsed: Vec<BigInt>,
 }
 
 #[napi(js_name = "SimulationClient")]
@@ -222,7 +222,7 @@ impl SimulationClient {
     }
 
     #[napi(js_name = "getAmountOut")]
-    pub fn get_amount_out(&self, token_in_address: String, token_out_address: String, amounts_in: Vec<f64>) -> Result<Vec<AmountOutResult>> {
+    pub fn get_amount_out(&self, token_in_address: String, token_out_address: String, amounts_in: Vec<BigInt>) -> Result<Vec<AmountOutResult>> {
         let runtime = tokio::runtime::Runtime::new()
             .map_err(|e| Error::from_reason(format!("Failed to create runtime: {}", e)))?;
         runtime.block_on(async {
@@ -255,21 +255,32 @@ impl SimulationClient {
                     let mut amounts_out = Vec::new();
                     let mut gas_used = Vec::new();
 
-                    for &amount_in in amounts_in.iter() {
-                        let amount_in_biguint = BigUint::from(amount_in as u64);
+                    for amount_in in amounts_in.iter() {
+                        // Convert NAPI BigInt to BigUint
+                        let (negative, words, _) = amount_in.get_u64();
+                        if negative {
+                            return Err(Error::from_reason("Amount cannot be negative"));
+                        }
+                        let amount_in_biguint = BigUint::from(words);
 
                         let result = state.get_amount_out(amount_in_biguint, token_in, token_out)
                             .map_err(|e| Error::from_reason(format!("Failed to get amount out: {}", e)))?;
                         
-                        let amount_out = result.amount.to_f64()
-                            .ok_or_else(|| Error::from_reason("Failed to convert amount to f64"))?;
+                        // Convert result amount to NAPI BigInt
+                        let amount_out_u64 = result.amount.to_u64()
+                            .ok_or_else(|| Error::from_reason("Amount too large for u64"))?;
+                        let amount_out = BigInt::from(amount_out_u64);
 
-                        log(&format!("Amount in: {}, Amount out: {}, Gas: {}", 
-                            amount_in, amount_out, result.gas));
+                        // Convert gas (BigUint) to u64 first, then to NAPI BigInt
+                        let gas_u64 = result.gas.to_u64()
+                            .ok_or_else(|| Error::from_reason("Gas value too large for u64"))?;
+                        let gas = BigInt::from(gas_u64);
+
+                        log(&format!("Amount in: {:?}, Amount out: {:?}, Gas: {}", 
+                            words, result.amount, gas_u64));
                         
                         amounts_out.push(amount_out);
-                        gas_used.push(result.gas.to_f64()
-                            .ok_or_else(|| Error::from_reason("Failed to convert gas to f64"))?);
+                        gas_used.push(gas);
                     }
 
                     results.push(AmountOutResult {
