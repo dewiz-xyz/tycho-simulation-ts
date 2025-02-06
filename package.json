@@ -7,6 +7,7 @@
   "description": "TypeScript bindings for Tycho simulation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "napi": {
     "name": "tycho-simulation-ts",
     "triples": {
@@ -32,13 +33,14 @@
     "build:native": "napi build --platform --release",
     "build:debug": "napi build --platform",
     "clean": "rm -rf target index.node dist 2>/dev/null || true",
-    "prepublishOnly": "napi prepublish -t npm",
+    "prepublishOnly": "npm run build",
+    "prepare": "npm run build",
     "test": "jest",
     "universal": "napi universal",
     "version": "napi version",
     "build:ts": "tsc",
     "build": "node scripts/build.js",
-    "test:amount": "ts-node examples/amount_out_test.ts"
+    "test:amount": "npm run build:ts && NODE_OPTIONS='--loader ts-node/esm --experimental-specifier-resolution=node' ts-node examples/amount_out_test.ts"
   },
   "repository": {
     "type": "git",
